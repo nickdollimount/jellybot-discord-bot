@@ -32,6 +32,17 @@ module.exports = {
         }
 
         const { suggestionsChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi } = require('../config.json')
+
+        let connectWithUser = ''
+
+        if (jellyfinUserId.value.length > 0){
+            connectWithUser = `/Users/${jellyfinUserId.value}`
+        }
+
+        const getSearchURL = (type) => {
+            return `${jellyfinServerURL.value}${connectWithUser}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=${type}&fields=overview,externalurls,genres&apikey=${jellyfinapi.value}`
+        }
+
         let type = interaction.options.getString('type')
         if (null == type){
             type = 'all'
@@ -43,8 +54,6 @@ module.exports = {
         }
 
         const searchCriteria = interaction.options.getString('criteria')
-        const moviesSearchURL = `${jellyfinServerURL.value}/Users/${jellyfinUserId.value}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=Movie&fields=overview,externalurls,genres&apikey=${jellyfinapi.value}`
-        const showsSearchURL = `${jellyfinServerURL.value}/Users/${jellyfinUserId.value}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=Series&fields=overview,externalurls,genres&apikey=${jellyfinapi.value}`
 
         let totalResults = 0
         let movies = []
@@ -53,7 +62,7 @@ module.exports = {
         // End variables declarations
 
         if (type === 'movie' || type === 'all'){
-            await fetch(moviesSearchURL, {
+            await fetch(getSearchURL('Movie'), {
                 method: "GET",
             }).then(async (result) => {
                 if (result.ok) {
@@ -79,7 +88,7 @@ module.exports = {
         }
         
         if (type === 'series' || type === 'all'){
-            await fetch(showsSearchURL, {
+            await fetch(getSearchURL('Series'), {
                 method: "GET",
             }).then(async (result) => {
                 if (result.ok) {
