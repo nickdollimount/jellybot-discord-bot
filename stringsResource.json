@@ -1,0 +1,3 @@
+{
+    "resWelcomeMessage": "`Welcome to the party, <@${userId}>! You've been assigned the <@&${roleObj.id}> role. Please take a moment and read the <#${welcomeChannelId}> channel. I try to be useful so if you want to know how I can help, use the '!commands' command. Be kind and enjoy your stay!`"
+}
