@@ -33,7 +33,7 @@ const guildMemberAdd_Handler = async (member) => {
         const roleObj = await guildObj.roles.fetch(defaultMemberRoleId.value)
         memberObj.roles.add(roleObj)
 
-        client.channels.cache.get(generalChannelId.value).send(`Welcome to the party, <@${userId}>! You've been assigned the <@&${roleObj.id}> role. Please take a moment and read the <#${welcomeChannelId.value}> channel. I try to be useful so if you want to know how I can help, use the '!commands' command. Be kind and enjoy your stay!`)
+        client.channels.cache.get(generalChannelId.value).send(`Welcome to the party, <@${userId}>! You've been assigned the <@&${roleObj.id}> role. Please take a moment and read the <#${welcomeChannelId.value}> channel. I try to be useful so if you want to know how I can help, hit the / key to see what commands I have available. Be kind and enjoy your stay!`)
 
         // member.user.send('Welcome!')
     } catch (error) {
@@ -77,7 +77,7 @@ const ready_Handler = async () => {
             }
         })();
     
-        client.channels.cache.get(botTestingChannelId.value).send("I'm here and ready to work!")
+        client.channels.cache.get(botTestingChannelId.value).send(`I'm here and ready to work!`)
         console.log('Jellybot is online!')
     } catch (error) {
         console.log(error)
