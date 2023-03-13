@@ -23,6 +23,7 @@ module.exports = {
     ,
     async execute(interaction) {
         const roundNum = (userNum) => { // Used to output rounded up number to single decimal point for ratings.
+            if (userNum == undefined) { return null }
             roundedNumber = Math.round(Number(userNum) * 10) / 10
             roundedNumber = roundedNumber + ""
             if(roundedNumber.indexOf('.') == -1){

@@ -2,7 +2,7 @@ const fs = require('node:fs')
 const { Client, Collection, GatewayIntentBits  } = require('discord.js')
 const { REST } = require('@discordjs/rest');
 const { Routes } = require('discord-api-types/v9');
-const { discordAppToken, generalChannelId, botTestingChannelId, discordServerId, defaultMemberRoleId, welcomeChannelId, bannedWords } = require('./config.json')
+const { discordAppToken, generalChannelId, botTestingChannelId, discordServerId, defaultMemberRoleId, welcomeChannelId, suggestionsChannelId, jellybotUserId, bannedWords } = require('./config.json')
 
 const client = new Client({
 	intents: [
@@ -10,6 +10,7 @@ const client = new Client({
 		GatewayIntentBits.GuildMessages,
 		GatewayIntentBits.MessageContent,
 		GatewayIntentBits.GuildMembers,
+        GatewayIntentBits.GuildMessageReactions,
 	],
 })
 
@@ -53,10 +54,17 @@ const guildMemberAdd_Handler = async (member) => {
 //     return false
 // }
 
-// const messageCreate_Handler = (msg) => {
-//     // Moderate message
-//     if (moderate_Message(msg)) { return }
-// }
+const messageCreate_Handler = async (msg) => {
+    // Moderate message
+    // if (moderate_Message(msg)) { return }
+
+    // Remove messages from Suggestions Channel, only allowing Jellybot to post threads for suggestions. This is to keep the channel clean and organized.
+    if (msg.channelId === suggestionsChannelId.value){
+        if (msg.author.id != jellybotUserId.value){
+            msg.delete()
+        }
+    }
+}
 
 const ready_Handler = async () => {
     try {
@@ -76,8 +84,8 @@ const ready_Handler = async () => {
                 if (error) console.error(error);
             }
         })();
-    
-        client.channels.cache.get(botTestingChannelId.value).send(`I'm here and ready to work!`)
+
+        await client.channels.cache.get(botTestingChannelId.value).send(`I'm here and ready to work!`)
         console.log('Jellybot is online!')
     } catch (error) {
         console.log(error)
@@ -98,7 +106,7 @@ const begin = () => {
     });
 
     client.on('messageCreate', (msg) => {
-        //messageCreate_Handler(msg)
+        messageCreate_Handler(msg)
     })
 
     client.on('guildMemberAdd', async (member) => {
