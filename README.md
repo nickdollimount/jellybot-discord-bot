@@ -3,7 +3,8 @@ A Dicord bot for use with a Jellyfin server.
  
 Here is a sample Discord channel setup with marked channels that are required by the bot:
  
-![image](https://user-images.githubusercontent.com/7452414/220355430-94f288d3-cec4-4165-8806-f285e9bba2dd.png)
+![image](https://user-images.githubusercontent.com/7452414/224669586-23462df2-9388-4cb4-a18a-4f349c0b8d4a.png)
+
 
 
 You will need to have a config.json file in the same directory as main.js. Use the template below.
@@ -13,7 +14,7 @@ You will need to have a config.json file in the same directory as main.js. Use t
 {
     "discordAppToken": {
         "value": "",
-        "comment": "This is retrieved from the Discord Developer Portal for the application."
+        "comment": "This is retrieved from the Discord Developers site for the application."
     },
     "jellyfinServerURL": {
         "value": "https://jellyfin.host.com",
@@ -61,7 +62,11 @@ You will need to have a config.json file in the same directory as main.js. Use t
     },
     "suggestionsChannelId": {
         "value": "",
-        "comment": "Right-click the channel and click 'Copy ID'. Discord Developer Mode must be enabled."
+        "comment": "Right-click the channel and click 'Copy ID'. Discord Developer Mode must be enabled. The /suggest command uses this to post a thread with the suggestion made and react with but the custom approval and custom disapproval emojis."
+    },
+    "cuttingBoardChannelId": {
+        "value": "",
+        "comment": "Right-click the channel and click 'Copy ID'. Discord Developer Mode must be enabled. The /cuttingboard command takes a share URL from the Jellyfin site of a movie or show. Jellybot will post a new thread into the cutting board channel and react with but the custom approval and custom disapproval emojis."
     },
     "botTestingChannelId": {
         "value": "",
@@ -71,9 +76,25 @@ You will need to have a config.json file in the same directory as main.js. Use t
         "value": "",
         "comment": "Right-click the user and click 'Copy ID'. Discord Developer Mode must be enabled. This account is used to notify new users of who to contact to request a new Jellyfin account on your server."
     },
+    "jellybotUserId": {
+        "value": "",
+        "comment": "Right-click the Jellybot user and click 'Copy ID'. This is used to skip auto message deletion in the Suggestions channel if it comes from the bot itself."
+    },
+    "customApproveEmojiName": {
+        "value": "TheaterHappy",
+        "comment": "Right-click the custom emoji and click 'Copy ID'. You can have a custom emoji in Discord or use an existing standard emoji."
+    },
+    "customDisapproveEmojiName": {
+        "value": "TheaterSad",
+        "comment": "Right-click the custom emoji and click 'Copy ID'. You can have a custom emoji in Discord or use an existing standard emoji."
+    },
+    "omdbAPIKey": {
+        "value": "",
+        "comment": "Receive a free API Key from https://www.omdbapi.com/. This is used to fetch the title and year of a suggestion made via an IMDB ID. You can receive a free OMDB API key from https://www.omdbapi.com/"
+    },
     "bannedWords": {
         "value": [],
-        "comment": "This list contains words that will trigger the bot to delete a user's message and send them a DM to let them know what happened."
+        "comment": "This list contains words that will trigger the bot to delete a user's message and send them a DM to let them know what happened. This functionality is no longer implemented as Discord provides AutoMod features built-in that handle this task."
     }
 }
 ```
