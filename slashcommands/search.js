@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('@discordjs/builders');
+const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('discord.js');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -32,7 +32,7 @@ module.exports = {
             return roundedNumber
         }
 
-        const { suggestionsChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi } = require('../config.json')
+        const { suggestionsChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi } = require('../config/config.json')
 
         let connectWithUser = ''
 

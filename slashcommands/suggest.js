@@ -1,4 +1,4 @@
-const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('@discordjs/builders');
+const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('discord.js');
 const { botTestingChannelId,
     suggestionsChannelId,
     newMoviesChannelId,
@@ -9,7 +9,7 @@ const { botTestingChannelId,
     omdbAPIKey,
     jellyfinUserId,
     jellyfinServerURL,
-    jellyfinapi } = require('../config.json')
+    jellyfinapi } = require('../config/config.json')
 
 module.exports = {
     data: new SlashCommandBuilder()

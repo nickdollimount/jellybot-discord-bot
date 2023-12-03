@@ -1,8 +1,6 @@
 const fs = require('node:fs')
-const { Client, Collection, GatewayIntentBits  } = require('discord.js')
-const { REST } = require('@discordjs/rest');
-const { Routes } = require('discord-api-types/v9');
-const { discordAppToken, generalChannelId, botTestingChannelId, discordServerId, defaultMemberRoleId, welcomeChannelId, suggestionsChannelId, jellybotUserId, bannedWords } = require('./config.json')
+const { Client, Collection, GatewayIntentBits, Routes, REST  } = require('discord.js')
+const { discordAppToken, generalChannelId, botTestingChannelId, discordServerId, defaultMemberRoleId, welcomeChannelId, suggestionsChannelId, jellybotUserId, bannedWords } = require('./config/config.json')
 
 const client = new Client({
 	intents: [
@@ -69,13 +67,13 @@ const messageCreate_Handler = async (msg) => {
 const ready_Handler = async () => {
     try {
         const CLIENT_ID = client.user.id;
-        const rest = new REST({
-            version: '9'
-        }).setToken(discordAppToken.value);
+
+        const rest = new REST().setToken(discordAppToken.value);
+
         (async () => {
             try {
                 await rest.put(
-                    Routes.applicationGuildCommands(CLIENT_ID, discordServerId.value), {
+                    Routes.applicationCommands(CLIENT_ID, discordServerId.value), {
                         body: slashcommands
                     },
                 );
