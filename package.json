@@ -1,7 +1,7 @@
 {
   "name": "discordbot",
   "version": "1.0.0",
-  "description": "Test Discord Bot",
+  "description": "Jellyfin Discord Bot",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

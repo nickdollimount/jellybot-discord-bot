@@ -1,4 +1,4 @@
-const { SlashCommandBuilder } = require('@discordjs/builders');
+const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('@discordjs/builders');
 const { botTestingChannelId,
     suggestionsChannelId,
     newMoviesChannelId,
@@ -25,7 +25,7 @@ module.exports = {
                 ))
         .addStringOption(option =>
             option.setName('suggestion')
-                .setDescription('Enter the suggested movie or show title.')
+                .setDescription('Enter the suggested movie or show title. Also accepts IMDb ID or IMDb URL.')
                 .setRequired(true)),
     async execute(interaction) {
         if (jellyfinUserId.value.length > 0){
@@ -45,22 +45,25 @@ module.exports = {
                 method: "GET",
             }).then(async (result) => {
                 if (result.ok) {
+                    console.log('Jellyfin Search Result: OK')
                     await result.json().then((data) => {
                         let results = data.Items
+                        
                         if (results.length > 0){
                             let found = false
                             results.forEach((result) => {
                                 result.ExternalUrls.forEach((url, index) => {
-                                    if (isIMDB(url.Url)){
+                                    if (isIMDB(url.Url) === suggestion){
                                         found = true
-                                        jellyfinServerId = results[index].ServerId
-                                        jellyfinTitleId = results[index].Id
+                                        jellyfinServerId = result.ServerId
+                                        jellyfinTitleId = result.Id
                                         return
                                     }
                                 })
                             })
                             if (found === true){
                                 alreadyOnServer = true
+                                console.log('AlreadyOnServer = TRUE')
                             }
                         }
                     })
@@ -77,7 +80,6 @@ module.exports = {
 
         const isIMDB = (str) => {
             const regex = /^(?:http:\/\/|https:\/\/)?(?:www\.|m\.)?(?:imdb.com\/title\/)?(tt[0-9]*)/gmi
-        
             let m
             while ((m = regex.exec(str)) !== null) {
                 if (m.index === regex.lastIndex) {
@@ -85,10 +87,12 @@ module.exports = {
                 }
                 return m[1]
             }
+
+            return false
         }
 
         let source = 'title'
-        if (undefined != isIMDB(suggestion)) {
+        if (false != isIMDB(suggestion)) {
             source = 'imdb'
             suggestion = isIMDB(suggestion)
         }
@@ -96,14 +100,15 @@ module.exports = {
         let thread
         switch (source) {
             case 'title':
+                console.log('Source: TITLE')
                 interaction.client.channels.cache.get(botTestingChannelId.value).send(`User <@${userId}> suggested the following: **${suggestion}**`)
                 thread = await interaction.client.channels.cache.get(suggestionsChannelId.value).threads.create({
                     name: `${suggestion}`,
-                    autoArchiveDuration: 4320,
+                    autoArchiveDuration: 10080,
                     reason: 'New user suggested title.'
                 })
 
-                thread.send(`The following title has been suggested:\n**${type}**\nTitle **${suggestion}**`)
+                thread.send(`Type **${type}**\nTitle **${suggestion}**`)
                 thread.send(`This thread can be used for discussion about the suggested title.`)
                 // Add custom approve/disapprove emoji reactions to the suggested thread.
                 try {
@@ -117,8 +122,16 @@ module.exports = {
                 } catch (error) { console.log(error) }
                 break
             case 'imdb':
+                console.log('Source: IMDB')
                 let title
                 let year
+                let description
+                let rated
+                let imdbRating
+                let imdbID
+                let genre
+                let posterURI
+
                 await fetch(`http://www.omdbapi.com/?apikey=${omdbAPIKey.value}&i=${suggestion}`, {
                     method: "GET",
                 }).then(async (result) => {
@@ -126,6 +139,12 @@ module.exports = {
                         await result.json().then(async (data) => {
                             title = data.Title
                             year = data.Year
+                            description = data.Plot
+                            rated = data.Rated
+                            imdbRating = data.imdbRating
+                            imdbID = data.imdbID
+                            genre = data.Genre
+                            posterURI = data.Poster
 
                             await checkJellyfin(title)
 
@@ -134,6 +153,7 @@ module.exports = {
                                 replied = true
                                 return
                             }
+
                         })
                     } else {
                         title = suggestion
@@ -145,25 +165,37 @@ module.exports = {
 
                 if (alreadyOnServer === false) {
                     interaction.client.channels.cache.get(botTestingChannelId.value).send(`User <@${userId}> suggested the following: **https://www.imdb.com/title/${suggestion}/**`)
-                thread = await interaction.client.channels.cache.get(suggestionsChannelId.value).threads.create({
-                    name: `${title} (${year})`,
-                    autoArchiveDuration: 4320,
-                    reason: 'New user suggested title.'
-                })
+                    thread = await interaction.client.channels.cache.get(suggestionsChannelId.value).threads.create({
+                        name: `${title} (${year})`,
+                        autoArchiveDuration: 10080,
+                        reason: 'New user suggested title.'
+                    })
 
-                thread.send(`https://www.imdb.com/title/${suggestion}/`)
-                thread.send(`This thread can be used for discussion about the suggested title.`)
+                    const newEmbed = new EmbedBuilder()
+                        .setTitle(title)
+                        .setDescription(description)
+                        .addFields(
+                            {name: 'Year', value: `${year ?? 'n/a'}`, inline: true},
+                            {name: 'Genre', value: `${genre ?? 'n/a'}`, inline: true},
+                            {name: 'Rated', value: `${rated ?? 'n/a'}`, inline: true},
+                            {name: 'IMDb ID', value: `${imdbID ?? 'n/a'}`, inline: true}
+                            )
+                        .setURL(`https://www.imdb.com/title/${imdbID}/`)
+                        .setThumbnail(`${posterURI}`)
+
+                    thread.send({embeds: [newEmbed]})
+                    thread.send('This thread can be used for discussion about the suggested title.')
 
                 // Add custom approve/disapprove emoji reactions to the suggested thread.
-                try {
-                    interaction.client.channels.cache.get(suggestionsChannelId.value).messages.fetch(thread.id)
-                        .then((message) => {
-                            const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName.value)
-                            message.react(approveEmoji)
-                            const disapproveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customDisapproveEmojiName.value)
-                            message.react(disapproveEmoji)
-                        })
-                } catch (error) { console.log(error) }
+                    try {
+                        interaction.client.channels.cache.get(suggestionsChannelId.value).messages.fetch(thread.id)
+                            .then((message) => {
+                                const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName.value)
+                                message.react(approveEmoji)
+                                const disapproveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customDisapproveEmojiName.value)
+                                message.react(disapproveEmoji)
+                            })
+                    } catch (error) { console.log(error) }
                 }
                 
                 break
