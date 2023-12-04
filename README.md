@@ -1,5 +1,5 @@
 # jellybot-discord-bot
-A Dicord bot for use with a Jellyfin server.
+A Discord bot for use with a Jellyfin server.
  
 Here is a sample Discord channel setup with marked channels that are required by the bot:
  
@@ -7,7 +7,7 @@ Here is a sample Discord channel setup with marked channels that are required by
 
 
 
-You will need to have a config.json file in the same directory as main.js. Use the template below.
+You will need to have a config.json file in the config subdirectory. Use the template below.
 
 ### CONFIG.JSON Template
 ```
