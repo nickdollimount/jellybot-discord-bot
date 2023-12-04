@@ -108,7 +108,7 @@ services:
     container_name: jellybot
     working_dir: /usr/src/app
     volumes:
-      - ./config:/usr/src/app/config
+      - /local/path/to/config/directory:/usr/src/app/config
     restart: unless-stopped
 ```
 
