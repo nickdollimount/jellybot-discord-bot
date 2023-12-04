@@ -1,23 +1,13 @@
 version: "3.1"
 services:
-# Jellybot
   jellybot:
-    #image: lscr.io/linuxserver/unifi-controller:latest
     container_name: jellybot
-    #environment:
-    #  - PUID=1000
-    #  - PGID=1001
-    #  - MEM_LIMIT=1024 #optional
+    image: "ndollimo/jellybot"
+    user: "node"
+    working_dir: /home/node/app
+    environment:
+      - NODE_ENV=production
     volumes:
-      - /usr/bin/jellybot/config:/config
-    #ports:
-    #  - 3478:3478/udp
-    #  - 10001:10001/udp
-    #  - 8080:8080
-    #  - 8443:8443
-#      - 1900:1900/udp #optional
-    #  - 8843:8843 #optional
-    #  - 8880:8880 #optional
-    #  - 5514:5514 #optional
-    #  - 27017:27017 #mongoDB
+      - ./:/home/node/app
     restart: unless-stopped
+    command: "npm start"

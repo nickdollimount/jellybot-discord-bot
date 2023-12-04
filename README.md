@@ -99,5 +99,22 @@ You will need to have a config.json file in the same directory as main.js. Use t
 }
 ```
 
+### docker-compose.yml
+```
+version: "3.1"
+services:
+  Jellybot:
+    image: ndollimo/jellybot:latest
+    container_name: jellybot
+    working_dir: /usr/src/app
+    volumes:
+      - ./config:/usr/src/app/config
+    restart: unless-stopped
+```
+
 ### Links
+[Jellybot Github Repository](https://github.com/nickdollimount/jellybot-discord-bot)
+
+[Jellybot Docker Hub Repository](https://hub.docker.com/repository/docker/ndollimo/jellybot/general)
+
 [Discord Developer Portal](https://discord.com/developers/applications)

@@ -1,21 +1,21 @@
-FROM node:21.3.0
+ARG NODE_VERSION=21.3
 
-ENV PATH="/usr/bin/jellyfin/config:${PATH}"
+FROM node:${NODE_VERSION}-alpine as base
+WORKDIR /usr/src/app
+EXPOSE 3000
 
-# Copy Jellybot files
-RUN mkdir /usr/bin/jellybot
-COPY node_modules/ /usr/bin/jellybot/node_modules
-COPY slashcommands/ /usr/bin/jellybot/slashcommands
-COPY main.js /usr/bin/jellybot
-COPY package.json /usr/bin/jellybot
-COPY package-lock.json /usr/bin/jellybot
-COPY README.md /usr/bin/jellybot
-COPY stringsResource.json /usr/bin/jellybot
-
-RUN mkdir /usr/bin/jellybot/config
-#RUN touch /usr/bin/jellybot/config/config.json
-COPY config/config.json /usr/bin/jellybot/config
-
-# Run the Jellybot Node application
-RUN node /usr/bin/jellybot/main.js
-
+FROM base as prod
+ENV NODE_ENV production
+RUN --mount=type=bind,source=package.json,target=package.json \
+    --mount=type=bind,source=package-lock.json,target=package-lock.json \
+    --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev
+USER node
+COPY node_modules ./node_modules
+COPY slashcommands ./slashcommands
+COPY main.js .
+COPY package.json .
+COPY package-lock.json .
+COPY stringsResource.json .
+COPY config ./config
+CMD node main.js
