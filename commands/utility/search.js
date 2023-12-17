@@ -32,7 +32,7 @@ module.exports = {
             return roundedNumber
         }
 
-        const { suggestionsChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi } = require('../config/config.json')
+        const { suggestionsChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi } = require('../../config/config.json')
 
         let connectWithUser = ''
 

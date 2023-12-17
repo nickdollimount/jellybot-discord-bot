@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('discord.js');
-const { accountRequestsUserId, jellyfinServerURL } = require('../config/config.json')
+const { accountRequestsUserId, jellyfinServerURL } = require('../../config/config.json')
 
 module.exports = {
     data: new SlashCommandBuilder()

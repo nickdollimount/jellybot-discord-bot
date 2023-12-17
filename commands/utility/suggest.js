@@ -9,7 +9,7 @@ const { botTestingChannelId,
     omdbAPIKey,
     jellyfinUserId,
     jellyfinServerURL,
-    jellyfinapi } = require('../config/config.json')
+    jellyfinapi } = require('../../config/config.json')
 
 module.exports = {
     data: new SlashCommandBuilder()

@@ -12,7 +12,7 @@ RUN --mount=type=bind,source=package.json,target=package.json \
     npm ci --omit=dev
 USER node
 COPY node_modules ./node_modules
-COPY slashcommands ./slashcommands
+COPY commands ./commands
 COPY main.js .
 COPY package.json .
 COPY package-lock.json .

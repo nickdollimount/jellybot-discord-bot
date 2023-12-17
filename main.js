@@ -1,4 +1,5 @@
 const fs = require('node:fs')
+const path = require('node:path');
 const { Client, Collection, GatewayIntentBits, Routes, REST  } = require('discord.js')
 const { discordAppToken, generalChannelId, botTestingChannelId, discordServerId, defaultMemberRoleId, welcomeChannelId, suggestionsChannelId, jellybotUserId, bannedWords } = require('./config/config.json')
 
@@ -12,16 +13,25 @@ const client = new Client({
 	],
 })
 
-const slashcommands = []; // Gets filled with dynamically the available command names and their description. This gets passed to the !commands handler.
+// // Creating a collection for commands in client
+client.commands = new Collection();
 
-// Creating a collection for commands in client
-client.slashcommands = new Collection();
-const slashCommandFiles = fs.readdirSync('./slashcommands').filter(file => file.endsWith('.js'));
+const foldersPath = path.join(__dirname, 'commands');
+const commandFolders = fs.readdirSync(foldersPath);
 
-for (const file of slashCommandFiles) {
-    const command = require(`./slashcommands/${file}`);
-    slashcommands.push(command.data.toJSON());
-    client.slashcommands.set(command.data.name, command);
+for (const folder of commandFolders) {
+	const commandsPath = path.join(foldersPath, folder);
+	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+	for (const file of commandFiles) {
+		const filePath = path.join(commandsPath, file);
+		const command = require(filePath);
+		// Set a new item in the Collection with the key as the command name and the value as the exported module
+		if ('data' in command && 'execute' in command) {
+			client.commands.set(command.data.name, command);
+		} else {
+			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+		}
+	}
 }
 
 const guildMemberAdd_Handler = async (member) => {
@@ -41,21 +51,7 @@ const guildMemberAdd_Handler = async (member) => {
     }
 }
 
-// const moderate_Message = (msg) => {
-//     bannedWords.value.forEach((word) => {
-//         if (msg.content.toLowerCase().includes(word)) {
-//             msg.delete()
-//             return true
-//         }
-//     })
-    
-//     return false
-// }
-
 const messageCreate_Handler = async (msg) => {
-    // Moderate message
-    // if (moderate_Message(msg)) { return }
-
     // Remove messages from Suggestions Channel, only allowing Jellybot to post threads for suggestions. This is to keep the channel clean and organized.
     if (msg.channelId === suggestionsChannelId.value){
         if (msg.author.id != jellybotUserId.value){
@@ -71,15 +67,25 @@ const ready_Handler = async () => {
         const rest = new REST().setToken(discordAppToken.value);
 
         (async () => {
+            console.log(`Started refreshing ${client.commands.length} application (/) commands.`);
+            // try {
+            //     console.log(`Started deleting ${client.commands.length} application (/) commands.`);
+                
+            //     const data = await rest.put(
+            //         Routes.applicationGuildCommands(CLIENT_ID), { body: [] })
+            //         .then(() => console.log(`Successfully deleted all global commands.`))
+            // } catch (error) {
+            //     console.error(error);
+            // }
+
             try {
-                await rest.put(
-                    Routes.applicationCommands(CLIENT_ID, discordServerId.value), {
-                        body: slashcommands
-                    },
-                );
-                console.log('Successfully registered application commands for development guild');
+                console.log(`Started creating ${client.commands.length} application (/) commands.`);
+        
+                const data = await rest.put(
+                    Routes.applicationGuildCommands(CLIENT_ID, discordServerId.value), { body: client.commands })
+                    .then(() => console.log(`Successfully created ${data.length} application (/) commands.`))
             } catch (error) {
-                if (error) console.error(error);
+                console.error(error);
             }
         })();
 
@@ -93,7 +99,7 @@ const ready_Handler = async () => {
 const begin = () => {
     client.on('interactionCreate', async interaction => {
         if (!interaction.isCommand()) return;
-        const command = client.slashcommands.get(interaction.commandName);
+        const command = client.commands.get(interaction.commandName);
         if (!command) return;
         try {
             await command.execute(interaction);

@@ -20,7 +20,7 @@ module.exports = {
             return roundedNumber
         }
 
-        const { cuttingBoardChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi, customApproveEmojiName, customDisapproveEmojiName } = require('../config/config.json')
+        const { cuttingBoardChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi, customApproveEmojiName, customDisapproveEmojiName } = require('../../config/config.json')
 
         let connectWithUser = ''
 
