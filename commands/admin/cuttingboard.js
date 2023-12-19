@@ -132,9 +132,9 @@ module.exports = {
                 reason: 'Item added to the cutting board.'
             })
 
-            thread.send({ embeds: resultEmbeds, content: `The following item has been added to the cutting board.`, ephemeral: true })
+            await thread.send({ embeds: resultEmbeds, content: `The following item has been added to the cutting board.`, ephemeral: true })
             try {
-                interaction.client.channels.cache.get(cuttingBoardChannelId.value).messages.fetch(thread.id)
+                await interaction.client.channels.cache.get(cuttingBoardChannelId.value).messages.fetch(thread.id)
                     .then((message) => {
                         const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName.value)
                         message.react(approveEmoji)
@@ -143,7 +143,7 @@ module.exports = {
                     })
             } catch (error) { console.log(error) }
 
-            thread.send(`If there are no objections, this will be removed from the Jellyfin server in a few days from now.`)
+            await thread.send(`If there are no objections, this will be removed from the Jellyfin server in a few days from now.`)
 
             await interaction.reply({ embeds: resultEmbeds, content: `The following show has been added to the cutting board.`, ephemeral: true })
         } else {
