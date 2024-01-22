@@ -1,4 +1,4 @@
-ARG NODE_VERSION=21.3
+ARG NODE_VERSION=21.6
 
 FROM node:${NODE_VERSION}-alpine as base
 WORKDIR /usr/src/app

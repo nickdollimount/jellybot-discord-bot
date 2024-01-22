@@ -1,6 +1,8 @@
 const { SlashCommandBuilder } = require('discord.js');
 
 module.exports = {
+    name: 'roll',
+    description: `I can roll a die for you! 🎲 In my bag, I have the following dice: D4, D6, D8, D10, D12 and D20.`,
     data: new SlashCommandBuilder()
         .setName('roll')
         .setDescription(`I can roll a die for you! 🎲 In my bag, I have the following dice: D4, D6, D8, D10, D12 and D20.`)

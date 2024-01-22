@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('discord.js');
 
 module.exports = {
+    name: 'search',
+    description: `Search Jellyfin. Max 10 detailed results.`,
     data: new SlashCommandBuilder()
         .setName('search')
         .setDescription(`Search Jellyfin. Max 10 detailed results.`)

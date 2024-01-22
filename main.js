@@ -60,40 +60,54 @@ const messageCreate_Handler = async (msg) => {
     }
 }
 
+const removeOldSuggestions = async (threadsArr, dateNow, threadAge) => {
+    threadsArr.forEach(async element => {
+        let threadId = element[1].id
+        let threadDate = new Date(element[1].createdTimestamp)
+        let threadName = element[1].name
+
+        threadDate.setDate(threadDate.getDate() + threadAge)
+        if (threadDate <= dateNow){
+            await client.channels.cache.get(suggestionsChannelId.value).messages.fetch(threadId).then(async (message) => {await message.delete().catch(console.error)}).catch(console.error)
+            await client.channels.cache.get(suggestionsChannelId.value).threads.fetch(threadId).then(async (thread) => {await thread.delete().catch(console.error)}).catch(console.error)
+            await client.channels.cache.get(botTestingChannelId.value).send(`Removed old suggestion '${threadName}'.`).then(() => {console.log(`Removed old suggestion '${threadName}'.`)}).catch(console.error)
+        }
+    })
+}
+
+const findOldSuggestions = async () => {
+    let dateNow = new Date()
+    let threadAge = 14 // Age in days after which the thread will be removed.
+    // Active Threads
+    await client.channels.cache.get(suggestionsChannelId.value).threads.fetchActive().then((foundThreads) => {
+        removeOldSuggestions(Array.from(foundThreads.threads), dateNow, threadAge)
+    }).catch(console.error)
+    
+
+    // Archived Threads
+    await client.channels.cache.get(suggestionsChannelId.value).threads.fetchArchived().then((foundThreads) => {
+        removeOldSuggestions(Array.from(foundThreads.threads), dateNow, threadAge)
+    }).catch(console.error)
+}
+
 const ready_Handler = async () => {
-    try {
-        const CLIENT_ID = client.user.id;
+    
+    findOldSuggestions()
+    
+    const CLIENT_ID = client.user.id;
+    const rest = new REST().setToken(discordAppToken.value);
 
-        const rest = new REST().setToken(discordAppToken.value);
+    (async () => {
+        console.log(`Started creating application (/) commands.`);
+    
+        const data = await rest.put(
+            Routes.applicationGuildCommands(CLIENT_ID, discordServerId.value), { body: client.commands })
+            .then(() => console.log(`Successfully created application (/) commands.`))
+            .catch(console.error)
 
-        (async () => {
-            console.log(`Started refreshing ${client.commands.length} application (/) commands.`);
-            // try {
-            //     console.log(`Started deleting ${client.commands.length} application (/) commands.`);
-                
-            //     const data = await rest.put(
-            //         Routes.applicationGuildCommands(CLIENT_ID), { body: [] })
-            //         .then(() => console.log(`Successfully deleted all global commands.`))
-            // } catch (error) {
-            //     console.error(error);
-            // }
+    })();
 
-            try {
-                console.log(`Started creating ${client.commands.length} application (/) commands.`);
-        
-                const data = await rest.put(
-                    Routes.applicationGuildCommands(CLIENT_ID, discordServerId.value), { body: client.commands })
-                    .then(() => console.log(`Successfully created ${data.length} application (/) commands.`))
-            } catch (error) {
-                console.error(error);
-            }
-        })();
-
-        await client.channels.cache.get(botTestingChannelId.value).send(`I'm here and ready to work!`)
-        console.log('Jellybot is online!')
-    } catch (error) {
-        console.log(error)
-    }
+    await client.channels.cache.get(botTestingChannelId.value).send(`I'm here and ready to work!`).then(() => {console.log('Jellybot is online!')}).catch(console.error)
 }
 
 const begin = () => {

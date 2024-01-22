@@ -2,6 +2,8 @@ const { SlashCommandBuilder } = require('discord.js');
 const { accountRequestsUserId, jellyfinServerURL } = require('../../config/config.json')
 
 module.exports = {
+    name: 'server',
+    description: `Information about the Jellyfin server.`,
     data: new SlashCommandBuilder()
         .setName('server')
         .setDescription(`Information about the Jellyfin server.`),

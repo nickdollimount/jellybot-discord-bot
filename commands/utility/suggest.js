@@ -12,6 +12,8 @@ const { botTestingChannelId,
     jellyfinapi } = require('../../config/config.json')
 
 module.exports = {
+    name: 'suggest',
+    description: `Make a suggestion for a movie or show to be downloaded.`,
     data: new SlashCommandBuilder()
         .setName('suggest')
         .setDescription(`Make a suggestion for a movie or show to be downloaded.`)

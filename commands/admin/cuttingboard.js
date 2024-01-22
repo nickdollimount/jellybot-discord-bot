@@ -1,6 +1,8 @@
 const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('discord.js');
 
 module.exports = {
+    name: 'cuttingboard',
+    description: `Add show to the cutting board.`,
     data: new SlashCommandBuilder()
         .setName('cuttingboard')
         .setDescription(`Add show to the cutting board.`)
