@@ -129,7 +129,7 @@ const ready_Handler = async () => {
         .then(() => console.log('Successfully deleted all guild commands.'))
         .catch(console.error)
 
-        await rest.put(Routes.applicationCommands(clientId), { body: [] })
+        await rest.put(Routes.applicationCommands(CLIENT_ID), { body: [] })
         .then(() => console.log('Successfully deleted all global commands.'))
         .catch(console.error);
 
