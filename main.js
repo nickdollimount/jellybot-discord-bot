@@ -129,6 +129,10 @@ const ready_Handler = async () => {
         .then(() => console.log('Successfully deleted all guild commands.'))
         .catch(console.error)
 
+        await rest.put(Routes.applicationCommands(clientId), { body: [] })
+        .then(() => console.log('Successfully deleted all global commands.'))
+        .catch(console.error);
+
         process.exit(1) // Exit application
     } else {
         // Register all commands.
