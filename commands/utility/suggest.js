@@ -1,15 +1,15 @@
 const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('discord.js');
-const { botTestingChannelId,
-    suggestionsChannelId,
-    newMoviesChannelId,
-    newShowsChannelId,
-    newEpisodesChannelId,
-    customApproveEmojiName,
-    customDisapproveEmojiName,
-    omdbAPIKey,
-    jellyfinUserId,
-    jellyfinServerURL,
-    jellyfinapi } = require('../../config/config.json')
+const botTestingChannelId = process.env.botTestingChannelId,
+    suggestionsChannelId = process.env.suggestionsChannelId,
+    newMoviesChannelId = process.env.newMoviesChannelId,
+    newShowsChannelId = process.env.newShowsChannelId,
+    newEpisodesChannelId = process.env.newEpisodesChannelId,
+    customApproveEmojiName = process.env.customApproveEmojiName,
+    customDisapproveEmojiName = process.env.customDisapproveEmojiName,
+    omdbAPIKey = process.env.omdbAPIKey,
+    jellyfinUserId = process.env.jellyfinUserId,
+    jellyfinServerURL = process.env.jellyfinServerURL,
+    jellyfinapi = process.env.jellyfinapi
 
 module.exports = {
     name: 'suggest',
@@ -30,11 +30,11 @@ module.exports = {
                 .setDescription('Enter the suggested movie or show title. Also accepts IMDb ID or IMDb URL.')
                 .setRequired(true)),
     async execute(interaction) {
-        if (jellyfinUserId.value.length > 0){
-            connectWithUser = `/Users/${jellyfinUserId.value}`
+        if (jellyfinUserId.length > 0){
+            connectWithUser = `/Users/${jellyfinUserId}`
         }
         const getSearchURL = (searchCriteria) => {
-            return `${jellyfinServerURL.value}${connectWithUser}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=Movie,Series&fields=externalurls&apikey=${jellyfinapi.value}`
+            return `${jellyfinServerURL}${connectWithUser}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=Movie,Series&fields=externalurls&apikey=${jellyfinapi}`
         }
 
         let alreadyOnServer = false
@@ -103,8 +103,8 @@ module.exports = {
         switch (source) {
             case 'title':
                 console.log('Source: TITLE')
-                interaction.client.channels.cache.get(botTestingChannelId.value).send(`User <@${userId}> suggested the following: **${suggestion}**`)
-                thread = await interaction.client.channels.cache.get(suggestionsChannelId.value).threads.create({
+                interaction.client.channels.cache.get(botTestingChannelId).send(`User <@${userId}> suggested the following: **${suggestion}**`)
+                thread = await interaction.client.channels.cache.get(suggestionsChannelId).threads.create({
                     name: `${suggestion}`,
                     autoArchiveDuration: 10080,
                     reason: 'New user suggested title.'
@@ -114,11 +114,11 @@ module.exports = {
                 thread.send(`This thread can be used for discussion about the suggested title.`)
                 // Add custom approve/disapprove emoji reactions to the suggested thread.
                 try {
-                    interaction.client.channels.cache.get(suggestionsChannelId.value).messages.fetch(thread.id)
+                    interaction.client.channels.cache.get(suggestionsChannelId).messages.fetch(thread.id)
                         .then((message) => {
-                            const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName.value)
+                            const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName)
                             message.react(approveEmoji)
-                            const disapproveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customDisapproveEmojiName.value)
+                            const disapproveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customDisapproveEmojiName)
                             message.react(disapproveEmoji)
                         })
                 } catch (error) { console.log(error) }
@@ -134,7 +134,7 @@ module.exports = {
                 let genre
                 let posterURI
 
-                await fetch(`http://www.omdbapi.com/?apikey=${omdbAPIKey.value}&i=${suggestion}`, {
+                await fetch(`http://www.omdbapi.com/?apikey=${omdbAPIKey}&i=${suggestion}`, {
                     method: "GET",
                 }).then(async (result) => {
                     if (result.ok) {
@@ -151,7 +151,7 @@ module.exports = {
                             await checkJellyfin(title)
 
                             if (alreadyOnServer === true) {
-                                interaction.reply({ content: `This title already exists on Jellyfin and can be found here: ${jellyfinServerURL.value}/web/index.html#!/details?id=${jellyfinTitleId}&serverId=${jellyfinServerId}`, ephemeral: true })
+                                interaction.reply({ content: `This title already exists on Jellyfin and can be found here: ${jellyfinServerURL}/web/index.html#!/details?id=${jellyfinTitleId}&serverId=${jellyfinServerId}`, ephemeral: true })
                                 replied = true
                                 return
                             }
@@ -166,8 +166,8 @@ module.exports = {
                 })
 
                 if (alreadyOnServer === false) {
-                    interaction.client.channels.cache.get(botTestingChannelId.value).send(`User <@${userId}> suggested the following: **https://www.imdb.com/title/${suggestion}/**`)
-                    thread = await interaction.client.channels.cache.get(suggestionsChannelId.value).threads.create({
+                    interaction.client.channels.cache.get(botTestingChannelId).send(`User <@${userId}> suggested the following: **https://www.imdb.com/title/${suggestion}/**`)
+                    thread = await interaction.client.channels.cache.get(suggestionsChannelId).threads.create({
                         name: `${title} (${year})`,
                         autoArchiveDuration: 10080,
                         reason: 'New user suggested title.'
@@ -190,11 +190,11 @@ module.exports = {
 
                 // Add custom approve/disapprove emoji reactions to the suggested thread.
                     try {
-                        interaction.client.channels.cache.get(suggestionsChannelId.value).messages.fetch(thread.id)
+                        interaction.client.channels.cache.get(suggestionsChannelId).messages.fetch(thread.id)
                             .then((message) => {
-                                const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName.value)
+                                const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName)
                                 message.react(approveEmoji)
-                                const disapproveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customDisapproveEmojiName.value)
+                                const disapproveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customDisapproveEmojiName)
                                 message.react(disapproveEmoji)
                             })
                     } catch (error) { console.log(error) }
@@ -206,10 +206,10 @@ module.exports = {
         if (replied === false) {
             switch (type) {
                 case 'movie':
-                    interaction.reply({ content: `Thanks for the suggestion! I'll see what I can do. Keep an eye on the <#${newMoviesChannelId.value}> channel for updates on when things arrive. Your suggestion has also been posted anonymously to the <#${suggestionsChannelId.value}> channel to allow for community discussion.`, ephemeral: true })
+                    interaction.reply({ content: `Thanks for the suggestion! I'll see what I can do. Keep an eye on the <#${newMoviesChannelId}> channel for updates on when things arrive. Your suggestion has also been posted anonymously to the <#${suggestionsChannelId}> channel to allow for community discussion.`, ephemeral: true })
                     break
                 case 'tvshow':
-                    interaction.reply({ content: `Thanks for the suggestion! I'll see what I can do. Keep an eye on the <#${newShowsChannelId.value}>, and <#${newEpisodesChannelId.value}> channels for updates on when things arrive. Your suggestion has also been posted anonymously to the <#${suggestionsChannelId.value}> channel to allow for community discussion.`, ephemeral: true })
+                    interaction.reply({ content: `Thanks for the suggestion! I'll see what I can do. Keep an eye on the <#${newShowsChannelId}>, and <#${newEpisodesChannelId}> channels for updates on when things arrive. Your suggestion has also been posted anonymously to the <#${suggestionsChannelId}> channel to allow for community discussion.`, ephemeral: true })
                     break
             }
         }

@@ -16,6 +16,5 @@ COPY commands ./commands
 COPY main.js .
 COPY package.json .
 COPY package-lock.json .
-COPY stringsResource.json .
-COPY config ./config
+
 CMD node main.js

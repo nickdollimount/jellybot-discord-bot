@@ -22,12 +22,17 @@ module.exports = {
             return roundedNumber
         }
 
-        const { cuttingBoardChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi, customApproveEmojiName, customDisapproveEmojiName } = require('../../config/config.json')
+        const cuttingBoardChannelId = process.env.cuttingBoardChannelId,
+        jellyfinUserId = process.env.jellyfinUserId,
+        jellyfinServerURL = process.env.jellyfinServerURL,
+        jellyfinapi = process.env.jellyfinapi,
+        customApproveEmojiName = process.env.customApproveEmojiName,
+        customDisapproveEmojiName = process.env.customDisapproveEmojiName
 
         let connectWithUser = ''
 
-        if (jellyfinUserId.value.length > 0) {
-            connectWithUser = `/Users/${jellyfinUserId.value}`
+        if (jellyfinUserId.length > 0) {
+            connectWithUser = `/Users/${jellyfinUserId}`
         }
 
         const getItemID = (url) => {
@@ -43,7 +48,7 @@ module.exports = {
         }
 
         const getSearchURL = () => {
-            return `${jellyfinServerURL.value}${connectWithUser}/Items?ids=${itemId}&fields=overview,externalurls,genres&apikey=${jellyfinapi.value}`
+            return `${jellyfinServerURL}${connectWithUser}/Items?ids=${itemId}&fields=overview,externalurls,genres&apikey=${jellyfinapi}`
         }
 
         const itemURL = interaction.options.getString('url')
@@ -85,8 +90,8 @@ module.exports = {
                             { name: 'Score', value: `⭐ ${roundNum(result.CommunityRating) ?? 'n/a'} 🍅 ${result.CriticRating ?? 'n/a'}`, inline: true },
                             { name: 'Rated', value: `${result.OfficialRating ?? 'n/a'}`, inline: true }
                         )
-                        .setURL(`${jellyfinServerURL.value}/web/index.html#!/details?id=${result.Id}&serverId=${result.ServerId}`)
-                        .setThumbnail(`${jellyfinServerURL.value}/Items/${result.Id}/Images/Primary`)
+                        .setURL(`${jellyfinServerURL}/web/index.html#!/details?id=${result.Id}&serverId=${result.ServerId}`)
+                        .setThumbnail(`${jellyfinServerURL}/Items/${result.Id}/Images/Primary`)
                     
                     showName = `${result.Name} (${result.ProductionYear})`
 
@@ -128,7 +133,7 @@ module.exports = {
                 await processResults(shows)
             }
 
-            thread = await interaction.client.channels.cache.get(cuttingBoardChannelId.value).threads.create({
+            thread = await interaction.client.channels.cache.get(cuttingBoardChannelId).threads.create({
                 name: `${showName}`,
                 autoArchiveDuration: 4320,
                 reason: 'Item added to the cutting board.'
@@ -136,11 +141,11 @@ module.exports = {
 
             await thread.send({ embeds: resultEmbeds, content: `The following item has been added to the cutting board.`, ephemeral: true })
             try {
-                await interaction.client.channels.cache.get(cuttingBoardChannelId.value).messages.fetch(thread.id)
+                await interaction.client.channels.cache.get(cuttingBoardChannelId).messages.fetch(thread.id)
                     .then((message) => {
-                        const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName.value)
+                        const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName)
                         message.react(approveEmoji)
-                        const disapproveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customDisapproveEmojiName.value)
+                        const disapproveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customDisapproveEmojiName)
                         message.react(disapproveEmoji)
                     })
             } catch (error) { console.log(error) }

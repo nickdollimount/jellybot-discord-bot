@@ -34,16 +34,19 @@ module.exports = {
             return roundedNumber
         }
 
-        const { suggestionsChannelId, jellyfinUserId, jellyfinServerURL, jellyfinapi } = require('../../config/config.json')
+        const suggestionsChannelId = process.env.suggestionsChannelId,
+        jellyfinUserId = process.env.jellyfinUserId,
+        jellyfinServerURL = process.env.jellyfinServerURL,
+        jellyfinapi = process.env.jellyfinapi
 
         let connectWithUser = ''
 
-        if (jellyfinUserId.value.length > 0){
-            connectWithUser = `/Users/${jellyfinUserId.value}`
+        if (jellyfinUserId.length > 0){
+            connectWithUser = `/Users/${jellyfinUserId}`
         }
 
         const getSearchURL = (type) => {
-            return `${jellyfinServerURL.value}${connectWithUser}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=${type}&fields=overview,externalurls,genres&apikey=${jellyfinapi.value}`
+            return `${jellyfinServerURL}${connectWithUser}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=${type}&fields=overview,externalurls,genres&apikey=${jellyfinapi}`
         }
 
         let type = interaction.options.getString('type')
@@ -174,8 +177,8 @@ module.exports = {
                             {name: 'Score', value: `⭐ ${roundNum(result.CommunityRating) ?? 'n/a'} 🍅 ${result.CriticRating ?? 'n/a'}`, inline: true},
                             {name: 'Rated', value: `${result.OfficialRating ?? 'n/a'}`, inline: true}
                             )
-                        .setURL(`${jellyfinServerURL.value}/web/index.html#!/details?id=${result.Id}&serverId=${result.ServerId}`)
-                        .setThumbnail(`${jellyfinServerURL.value}/Items/${result.Id}/Images/Primary`)
+                        .setURL(`${jellyfinServerURL}/web/index.html#!/details?id=${result.Id}&serverId=${result.ServerId}`)
+                        .setThumbnail(`${jellyfinServerURL}/Items/${result.Id}/Images/Primary`)
 
                         if (result.Genres.length > 0){
                             let genres = ''
@@ -225,7 +228,7 @@ module.exports = {
                 }
             }
         } else {
-            await interaction.reply({ content: `Sorry, no results found on the Jellyfin server for **${searchCriteria}**. Maybe make a suggestion in the <#${suggestionsChannelId.value}> channel or by using the **/suggest** command!`, ephemeral: true });
+            await interaction.reply({ content: `Sorry, no results found on the Jellyfin server for **${searchCriteria}**. Maybe make a suggestion in the <#${suggestionsChannelId}> channel or by using the **/suggest** command!`, ephemeral: true });
         }
     }
 };
