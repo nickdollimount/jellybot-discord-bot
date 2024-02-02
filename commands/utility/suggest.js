@@ -13,7 +13,6 @@ const botTestingChannelId = process.env.botTestingChannelId,
 
 module.exports = {
     name: 'suggest',
-    description: `Make a suggestion for a movie or show to be downloaded.`,
     data: new SlashCommandBuilder()
         .setName('suggest')
         .setDescription(`Make a suggestion for a movie or show to be downloaded.`)
@@ -214,5 +213,6 @@ module.exports = {
             }
         }
         
-    }
+    },
+    description: `Make a suggestion for a movie or show to be downloaded.`
 }

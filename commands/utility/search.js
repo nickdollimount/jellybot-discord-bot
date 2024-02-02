@@ -2,7 +2,6 @@ const { SlashCommandBuilder, EmbedBuilder, hyperlink } = require('discord.js');
 
 module.exports = {
     name: 'search',
-    description: `Search Jellyfin. Max 10 detailed results.`,
     data: new SlashCommandBuilder()
         .setName('search')
         .setDescription(`Search Jellyfin. Max 10 detailed results.`)
@@ -230,5 +229,6 @@ module.exports = {
         } else {
             await interaction.reply({ content: `Sorry, no results found on the Jellyfin server for **${searchCriteria}**. Maybe make a suggestion in the <#${suggestionsChannelId}> channel or by using the **/suggest** command!`, ephemeral: true });
         }
-    }
+    },
+    description: `Search Jellyfin. Max 10 detailed results.`
 };

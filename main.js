@@ -1,5 +1,5 @@
 const fs = require('node:fs')
-const path = require('node:path');
+const path = require('node:path')
 const { Client, Collection, GatewayIntentBits, Routes, REST  } = require('discord.js')
 const discordAppToken = process.env.discordAppToken,
 generalChannelId = process.env.generalChannelId,
@@ -24,22 +24,24 @@ const client = new Client({
 })
 
 // // Creating a collection for commands in client
-client.commands = new Collection();
+client.commands = new Collection()
+const commands = []
 
-const foldersPath = path.join(__dirname, 'commands');
-const commandFolders = fs.readdirSync(foldersPath);
+const foldersPath = path.join(__dirname, 'commands')
+const commandFolders = fs.readdirSync(foldersPath)
 
 for (const folder of commandFolders) {
-	const commandsPath = path.join(foldersPath, folder);
-	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
+	const commandsPath = path.join(foldersPath, folder)
+	const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'))
 	for (const file of commandFiles) {
-		const filePath = path.join(commandsPath, file);
-		const command = require(filePath);
+		const filePath = path.join(commandsPath, file)
+		const command = require(filePath)
 		// Set a new item in the Collection with the key as the command name and the value as the exported module
 		if ('data' in command && 'execute' in command) {
-			client.commands.set(command.data.name, command);
+            client.commands.set(command.data.name, command)
+			commands.push(command.data.toJSON())
 		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`);
+			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`)
 		}
 	}
 }
@@ -120,8 +122,8 @@ const findOldSuggestionsLoop = async (intervalHours) => {
 }
 
 const ready_Handler = async () => {
-    const CLIENT_ID = client.user.id;
-    const rest = new REST().setToken(discordAppToken);
+    const CLIENT_ID = client.user.id
+    const rest = new REST().setToken(discordAppToken)
 
     if (deleteCommands === "true") {
         // Delete all commands
@@ -131,15 +133,15 @@ const ready_Handler = async () => {
 
         await rest.put(Routes.applicationCommands(CLIENT_ID), { body: [] })
         .then(() => console.log('Successfully deleted all global commands.'))
-        .catch(console.error);
+        .catch(console.error)
 
         process.exit(1) // Exit application
-    } else {
-        // Register all commands.
-        await rest.put(Routes.applicationGuildCommands(CLIENT_ID, discordServerId), { body: client.commands })
-        .then(() => console.log(`Successfully created application (/) commands.`))
-        .catch(console.error)
     }
+
+    // Register all commands.
+    const data = await rest.put(Routes.applicationGuildCommands(CLIENT_ID, discordServerId), { body: commands })
+    .then(() => console.log(`Successfully created application (/) commands.`))
+    .catch(console.error)
 
     findOldSuggestionsLoop(clearSuggestionsFrequencyHours) // Clear old suggestions every 8 hours.
 
@@ -148,16 +150,16 @@ const ready_Handler = async () => {
 
 const begin = () => {
     client.on('interactionCreate', async interaction => {
-        if (!interaction.isCommand()) return;
-        const command = client.commands.get(interaction.commandName);
-        if (!command) return;
+        if (!interaction.isCommand()) return
+        const command = client.commands.get(interaction.commandName)
+        if (!command) return
         try {
-            await command.execute(interaction);
+            await command.execute(interaction)
         } catch (error) {
-            if (error) console.error(error);
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            if (error) console.error(error)
+            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true })
         }
-    });
+    })
 
     client.on('messageCreate', (msg) => {
         messageCreate_Handler(msg)

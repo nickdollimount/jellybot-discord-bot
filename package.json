@@ -1,18 +1,20 @@
 {
   "name": "discordbot",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Jellyfin Discord Bot",
   "main": "main.js",
   "scripts": {
-    "start": "node main.js",
+    "start": "node -r dotenv/config main.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Nick Dollimount",
   "license": "ISC",
   "dependencies": {
     "discord.js": "^14.14.1",
+    "dotenv": "^16.4.1",
     "latest": "^0.2.0",
     "n": "^9.2.0",
+    "node.js": "^0.0.1-security",
     "sequelize": "^6.29.3",
     "sqlite3": "^5.1.6"
   }
