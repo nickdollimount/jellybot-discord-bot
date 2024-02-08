@@ -74,8 +74,9 @@ const removeOldSuggestions = async (threadsArr, dateNow, threadAge) => {
         let threadId = element[1].id
         let threadDate = new Date(element[1].createdTimestamp)
         let threadName = element[1].name
-
-        threadDate.setDate(threadDate.getDate() + threadAge)
+        
+        threadDate.setDate(threadDate.getDate() + parseInt(threadAge))
+        
         if (threadDate <= dateNow){
             await client.channels.cache.get(suggestionsChannelId).messages.fetch(threadId).then(async (message) => {await message.delete().catch(console.error)}).catch(console.error)
             await client.channels.cache.get(suggestionsChannelId).threads.fetch(threadId).then(async (thread) => {await thread.delete().catch(console.error)}).catch(console.error)
@@ -98,7 +99,7 @@ const setTimeoutAsync = async (callbackmethod, milliseconds) => {
 }
 
 const findOldSuggestions = async () => {
-    console.log('[FindOldSuggestions] Start')
+    console.log((new Date()).toLocaleString() + ' - [FindOldSuggestions] Start')
     let dateNow = new Date()
 
     // Active Threads
@@ -111,7 +112,7 @@ const findOldSuggestions = async () => {
     await client.channels.cache.get(suggestionsChannelId).threads.fetchArchived().then((foundThreads) => {
         removeOldSuggestions(Array.from(foundThreads.threads), dateNow, clearSuggestionsOlderThanDays)
     }).catch(console.error)
-    console.log('[FindOldSuggestions] Complete')
+    console.log((new Date()).toLocaleString() + ' - [FindOldSuggestions] Complete')
 }
 
 const findOldSuggestionsLoop = async (intervalHours) => {
