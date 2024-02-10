@@ -23,6 +23,8 @@ const client = new Client({
 	],
 })
 
+const utils = require('./utils.js')
+
 // // Creating a collection for commands in client
 client.commands = new Collection()
 const commands = []
@@ -69,59 +71,6 @@ const messageCreate_Handler = async (msg) => {
     }
 }
 
-const removeOldSuggestions = async (threadsArr, dateNow, threadAge) => {
-    threadsArr.forEach(async element => {
-        let threadId = element[1].id
-        let threadDate = new Date(element[1].createdTimestamp)
-        let threadName = element[1].name
-        
-        threadDate.setDate(threadDate.getDate() + parseInt(threadAge))
-        
-        if (threadDate <= dateNow){
-            await client.channels.cache.get(suggestionsChannelId).messages.fetch(threadId).then(async (message) => {await message.delete().catch(console.error)}).catch(console.error)
-            await client.channels.cache.get(suggestionsChannelId).threads.fetch(threadId).then(async (thread) => {await thread.delete().catch(console.error)}).catch(console.error)
-            await client.channels.cache.get(botTestingChannelId).send(`Removed old suggestion '${threadName}'.`).then(() => {console.log(`Removed old suggestion '${threadName}'.`)}).catch(console.error)
-        }
-    })
-}
-
-const setTimeoutAsync = async (callbackmethod, milliseconds) => {
-    await new Promise((resolve, reject) => {
-        setTimeout((timeoutCallback) => {
-            try {
-                timeoutCallback()
-            } catch (error) {
-                reject(error)
-            }
-            resolve(true)
-        }, milliseconds, callbackmethod)
-    })
-}
-
-const findOldSuggestions = async () => {
-    console.log((new Date()).toLocaleString() + ' - [FindOldSuggestions] Start')
-    let dateNow = new Date()
-
-    // Active Threads
-    await client.channels.cache.get(suggestionsChannelId).threads.fetchActive().then((foundThreads) => {
-        removeOldSuggestions(Array.from(foundThreads.threads), dateNow, clearSuggestionsOlderThanDays)
-    }).catch(console.error)
-    
-
-    // Archived Threads
-    await client.channels.cache.get(suggestionsChannelId).threads.fetchArchived().then((foundThreads) => {
-        removeOldSuggestions(Array.from(foundThreads.threads), dateNow, clearSuggestionsOlderThanDays)
-    }).catch(console.error)
-    console.log((new Date()).toLocaleString() + ' - [FindOldSuggestions] Complete')
-}
-
-const findOldSuggestionsLoop = async (intervalHours) => {
-    while(true){
-        await findOldSuggestions()
-        await setTimeoutAsync(() => {}, (intervalHours*3600000))
-    }
-}
-
 const ready_Handler = async () => {
     const CLIENT_ID = client.user.id
     const rest = new REST().setToken(discordAppToken)
@@ -144,9 +93,9 @@ const ready_Handler = async () => {
     .then(() => console.log(`Successfully created application (/) commands.`))
     .catch(console.error)
 
-    findOldSuggestionsLoop(clearSuggestionsFrequencyHours) // Clear old suggestions every 8 hours.
-
     await client.channels.cache.get(botTestingChannelId).send(`I'm here and ready to work!`).then(() => {console.log('Jellybot is online!')}).catch(console.error)
+
+    utils.messageCleanup(client, suggestionsChannelId, clearSuggestionsFrequencyHours, clearSuggestionsOlderThanDays)
 }
 
 const begin = () => {
