@@ -14,6 +14,7 @@ USER node
 COPY node_modules ./node_modules
 COPY commands ./commands
 COPY main.js .
+COPY utils.js .
 COPY package.json .
 COPY package-lock.json .
 
