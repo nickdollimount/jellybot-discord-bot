@@ -6,6 +6,7 @@ const botTestingChannelId = process.env.botTestingChannelId,
     newEpisodesChannelId = process.env.newEpisodesChannelId,
     customApproveEmojiName = process.env.customApproveEmojiName,
     customDisapproveEmojiName = process.env.customDisapproveEmojiName,
+    accountRequestsUserId = process.env.accountRequestsUserId,
     omdbAPIKey = process.env.omdbAPIKey,
     jellyfinUserId = process.env.jellyfinUserId,
     jellyfinServerURL = process.env.jellyfinServerURL,
@@ -45,12 +46,10 @@ module.exports = {
         const userId = interaction.member.user.id
 
         const checkJellyfin = async (title) => {
-            console.log(`Jellyfin Search: ${title}`)
             await fetch(getSearchURL(title), {
                 method: "GET",
             }).then(async (result) => {
                 if (result.ok) {
-                    console.log('Jellyfin Search Result: OK')
                     await result.json().then((data) => {
                         let results = data.Items
                         if (results.length > 0){
@@ -64,11 +63,15 @@ module.exports = {
                                         jellyfinTitleId = result.Id
                                     }
                                 })
+                                if (source == 'title'){
+                                    if (result.Name.toLowerCase() == suggestion.toLowerCase()){
+                                        found = true
+                                    }
+                                }
                             })
 
                             if (found === true){
                                 alreadyOnServer = true
-                                console.log('AlreadyOnServer = TRUE')
                             }
                         }
                     })
@@ -185,7 +188,7 @@ module.exports = {
                         break
                 }
             } else {
-                await interaction.editReply({ content: `This title already exists on Jellyfin and can be found here: ${jellyfinServerURL}/web/index.html#!/details?id=${jellyfinTitleId}&serverId=${jellyfinServerId}`, embeds: [], components: [], ephemeral: true })
+                await interaction.editReply({ content: `This title already exists on Jellyfin and can be found here: ${jellyfinServerURL}/web/index.html#!/details?id=${jellyfinTitleId}&serverId=${jellyfinServerId}\nIf this is not the correct title matching your suggestion, please send a DM to <@${accountRequestsUserId}>.`, embeds: [], components: [], ephemeral: true })
             }
         }
 
