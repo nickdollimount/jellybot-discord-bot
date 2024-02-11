@@ -135,8 +135,7 @@ module.exports = {
                     interaction.client.channels.cache.get(botTestingChannelId).send(`User <@${userId}> suggested the following: **${suggestion}**`)
                 }
                 
-                // -
-                let thread = await interaction.client.channels.cache.get(botTestingChannelId).threads.create({
+                let thread = await interaction.client.channels.cache.get(suggestionsChannelId).threads.create({
                     name: (imdbObj) ? `${imdbObj.title} (${imdbObj.year})` : suggestion,
                     autoArchiveDuration: 10080,
                     reason: 'New user suggested title.'
@@ -168,8 +167,7 @@ module.exports = {
     
             // Add custom approve/disapprove emoji reactions to the suggested thread.
                 try {
-                    // -
-                    interaction.client.channels.cache.get(botTestingChannelId).messages.fetch(thread.id)
+                    interaction.client.channels.cache.get(suggestionsChannelId).messages.fetch(thread.id)
                         .then((message) => {
                             const approveEmoji = message.guild.emojis.cache.find(emoji => emoji.name === customApproveEmojiName)
                             message.react(approveEmoji)
