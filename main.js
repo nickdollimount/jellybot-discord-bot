@@ -23,6 +23,7 @@ const client = new Client({
 	],
 })
 
+const { log, _ltypes } = require('./utils.js')
 const utils = require('./utils.js')
 
 // // Creating a collection for commands in client
@@ -43,7 +44,7 @@ for (const folder of commandFolders) {
             client.commands.set(command.data.name, command)
 			commands.push(command.data.toJSON())
 		} else {
-			console.log(`[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`)
+            log(_ltypes.warn, 'COMMANDS', `The command at ${filePath} is missing a required "data" or "execute" property.`)
 		}
 	}
 }
@@ -78,11 +79,11 @@ const ready_Handler = async () => {
     if (deleteCommands === "true") {
         // Delete all commands
         await rest.put(Routes.applicationGuildCommands(CLIENT_ID, discordServerId), { body: [] })
-        .then(() => console.log('Successfully deleted all guild commands.'))
+        .then(() => {log(_ltypes.success, 'COMMANDS', `Successfully deleted all guild commands.`)})
         .catch(console.error)
 
         await rest.put(Routes.applicationCommands(CLIENT_ID), { body: [] })
-        .then(() => console.log('Successfully deleted all global commands.'))
+        .then(() => {log(_ltypes.success, 'COMMANDS', `Successfully deleted all global commands.`)})
         .catch(console.error)
 
         process.exit(1) // Exit application
@@ -90,10 +91,10 @@ const ready_Handler = async () => {
 
     // Register all commands.
     const data = await rest.put(Routes.applicationGuildCommands(CLIENT_ID, discordServerId), { body: commands })
-    .then(() => console.log(`Successfully created application (/) commands.`))
+    .then(() => {log(_ltypes.success, 'COMMANDS', `Successfully created application (/) commands.`)})
     .catch(console.error)
 
-    await client.channels.cache.get(botTestingChannelId).send(`I'm here and ready to work!`).then(() => {console.log('Jellybot is online!')}).catch(console.error)
+    await client.channels.cache.get(botTestingChannelId).send(`I'm here and ready to work!`).then(() => {log(_ltypes.success, 'JELLYBOT', `Jellybot is online!`)}).catch(console.error)
 
     utils.messageCleanup(client, suggestionsChannelId, clearSuggestionsFrequencyHours, clearSuggestionsOlderThanDays)
 }

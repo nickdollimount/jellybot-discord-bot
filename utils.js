@@ -1,7 +1,13 @@
 module.exports = {
-    _types : {
-        message: 'MESSAGE',
-        thread: 'THREAD'
+    _ltypes : {
+        info: 'INFO',
+        warn: 'WARNING',
+        error: 'ERROR',
+        success: 'SUCCESS'
+    },   
+
+    async log(_type, _source, _message){
+        console.log((new Date()).toLocaleString() + ` | [${_type}] | [${_source}] | ${_message}`)
     },
 
     async _setTimeoutAsync(_callbackMethod, _milliseconds) {
@@ -17,25 +23,13 @@ module.exports = {
         })
     },
 
-    async _log(_success, _type, _messageId){
-        switch (_success) {
-            case true:
-                console.log((new Date()).toLocaleString() + ` | [${_type}] | Successfully deleted, ID ${_messageId}.`)
-                break;
-        
-            case false:
-                console.log((new Date()).toLocaleString() + ` | [${_type}] | Something went wrong, ID ${_messageId}.`)
-                break;
-        }
-    },
-
     async _removeMessage(_client, _channelId, _messages) {
         await new Promise((resolve, reject) => {
             const channel = _client.channels.cache.get(_channelId)
 
             _messages.forEach(async (_msg) => {
-                await channel.messages.fetch(_msg.id).then(async (message) => {await message.delete().then(() => this._log(true, this._types.message, _msg.id)).catch(() => this._log(false, this._types.message, _msg.id))}).catch(() => this._log(false, this._types.message, _msg.id)) // Delete message
-                await channel.threads.fetch(_msg.id).then(async (thread) => {await thread.delete().then(() => this._log(true, this._types.thread, _msg.id)).catch(() => this._log(false, this._types.thread, _msg.id))}).catch(() => this._log(false, this._types.thread, _msg.id)) // Delete thread associated with message
+                await channel.messages.fetch(_msg.id).then(async (message) => {await message.delete().then(() => this.log(this._ltypes.success, 'MESSAGES', _msg.id)).catch(() => this.log(this._ltypes.error, 'MESSAGES', _msg.id))}).catch(() => this.log(this._ltypes.error, 'MESSAGES', _msg.id)) // Delete message
+                await channel.threads.fetch(_msg.id).then(async (thread) => {await thread.delete().then(() => this.log(this._ltypes.success, 'THREADS', _msg.id)).catch(() => this.log(this._ltypes.error, 'THREADS', _msg.id))}).catch(() => this.log(this._ltypes.error, 'THREADS', _msg.id)) // Delete thread associated with message
             })
 
             resolve(true)
@@ -82,7 +76,7 @@ module.exports = {
         while(true){
             let _dateNow = new Date()
 
-            console.log((new Date()).toLocaleString() + ' - [MESSAGECLEANUP] Start')
+            this.log(this._ltypes.info, 'MESSAGECLEANUP', 'Start')
 
             const _messages = await this._getAllMessages(_client, _channelId)
             const _oldMessages = await this._getOldMessages(_messages, _dateNow, _messageAge)

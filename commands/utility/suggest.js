@@ -1,4 +1,6 @@
 const { SlashCommandBuilder, EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js')
+const { log, _ltypes } = require('../../utils.js')
+
 const botTestingChannelId = process.env.botTestingChannelId,
     suggestionsChannelId = process.env.suggestionsChannelId,
     newMoviesChannelId = process.env.newMoviesChannelId,
@@ -22,8 +24,8 @@ module.exports = {
                 .setDescription('Your suggestion type.')
                 .setRequired(true)
                 .addChoices(
-                    { name: 'Movie', value: 'movie' },
-                    { name: 'Series', value: 'series' }
+                    { name: 'Movie', value: 'Movie' },
+                    { name: 'Series', value: 'Series' }
                 ))
         .addStringOption(option =>
             option.setName('suggestion')
@@ -33,8 +35,8 @@ module.exports = {
         if (jellyfinUserId.length > 0){
             connectWithUser = `/Users/${jellyfinUserId}`
         }
-        const getSearchURL = (searchCriteria) => {
-            return `${jellyfinServerURL}${connectWithUser}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=Movie,Series&fields=externalurls&apikey=${jellyfinapi}`
+        const getSearchURL = (searchCriteria, mediaType) => {
+            return `${jellyfinServerURL}${connectWithUser}/Items?searchTerm=${searchCriteria}&Recursive=true&IncludeMedia=true&IncludeItemTypes=${mediaType}&fields=externalurls&apikey=${jellyfinapi}`
         }
 
         let alreadyOnServer = false
@@ -45,8 +47,10 @@ module.exports = {
         let suggestion = interaction.options.getString('suggestion')
         const userId = interaction.member.user.id
 
-        const checkJellyfin = async (title) => {
-            await fetch(getSearchURL(title), {
+        const checkJellyfin = async (title, mediaType) => {
+            log(_ltypes.info, 'CHECKJELLYFIN', 'Start')
+            log(_ltypes.info, 'JELLYFIN', title)
+            await fetch(getSearchURL(title, mediaType), {
                 method: "GET",
             }).then(async (result) => {
                 if (result.ok) {
@@ -66,10 +70,13 @@ module.exports = {
                                 if (source == 'title'){
                                     if (result.Name.toLowerCase() == suggestion.toLowerCase()){
                                         found = true
+                                        jellyfinServerId = result.ServerId
+                                        jellyfinTitleId = result.Id
                                     }
                                 }
                             })
 
+                            log(_ltypes.info, 'JELLYFIN', found)
                             if (found === true){
                                 alreadyOnServer = true
                             }
@@ -79,6 +86,7 @@ module.exports = {
             }).catch((error) => {
                 console.log(error)
             })
+            log(_ltypes.info, 'CHECKJELLYFIN', 'Finish')
         }
 
         const getImdbDetails = async (imdbID) => {
@@ -129,7 +137,15 @@ module.exports = {
         }
 
         const addSuggestion = async (imdbObj) => {
-            (imdbObj) ? await checkJellyfin(imdbObj.title) : await checkJellyfin(suggestion)
+            log(_ltypes.info, 'ADDSUGGESTION', 'Start')
+
+            if (imdbObj) {
+                await checkJellyfin(imdbObj.title, type)
+            } else {
+                await checkJellyfin(suggestion, type)
+            }
+
+            log(_ltypes.info, 'ADDSUGGESTION', `alreadyOnServer=${alreadyOnServer}`)
 
             if (!alreadyOnServer) {
                 if (imdbObj) {
@@ -190,6 +206,7 @@ module.exports = {
             } else {
                 await interaction.editReply({ content: `This title already exists on Jellyfin and can be found here: ${jellyfinServerURL}/web/index.html#!/details?id=${jellyfinTitleId}&serverId=${jellyfinServerId}\nIf this is not the correct title matching your suggestion, please send a DM to <@${accountRequestsUserId}>.`, embeds: [], components: [], ephemeral: true })
             }
+            log(_ltypes.info, 'ADDSUGGESTION', 'Finish')
         }
 
         let source = 'title'
